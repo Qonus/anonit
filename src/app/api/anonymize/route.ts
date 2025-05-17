@@ -1,11 +1,10 @@
-import { getApiUrl } from "@/lib/utils";
-import axios from "axios";
+import { anonymizeText } from "../actions";
 
 export async function POST(request: Request) {
     const body = await request.json();
     try {
-        const response = await axios.post(`${getApiUrl()}/analyze`, {text: body.text, language: body.language});
-        return new Response(JSON.stringify(response.data), {
+        const response = await anonymizeText(body.text);
+        return new Response(JSON.stringify(response), {
             status: 201,
             headers: { "Content-Type": "application/json" }
         });

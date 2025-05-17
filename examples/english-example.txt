@@ -1,0 +1,44 @@
+Document Title: Overview of ISO/IEC 27001 Implementation at GlobalTech Solutions Ltd.
+
+Author:
+Name: Dr. Emily R. Hastings
+Position: Chief Information Security Officer
+Email: emily.hastings@globaltech-sys.com
+Phone: +1 (415) 555-0198
+Employee ID: GT-SEC-048729
+Passport No.: 478920134-USA
+National Insurance Number: ZH 19 83 52 C
+GitHub: https://github.com/emilyrsec
+LinkedIn: https://linkedin.com/in/emily-hastings-ciso
+
+Organization Information:
+Company Name: GlobalTech Solutions Ltd.
+Address: 2398 Ocean Avenue, Suite 402, San Francisco, CA, 94127, USA
+DUNS Number: 09-732-9846
+VAT Number: US98 8329 1200
+Company Registration Number: C2789012
+Bank Account:
+ Bank: First International Credit Union
+ IBAN: US58FICU049283740192
+ SWIFT/BIC: FICUUS44XXX
+ Routing Number: 121000358
+ Account Number: 0492837401
+
+Standard Implemented: ISO/IEC 27001:2022
+Certification Body: QualityCert International
+Certificate ID: QC-ISO27001-GTS-2024-1147
+Issue Date: 2024-09-16
+Expiry Date: 2027-09-15
+
+Executive Summary:
+GlobalTech Solutions Ltd. has successfully implemented an Information Security Management System (ISMS) in accordance with the ISO/IEC 27001:2022 international standard. The scope of the ISMS includes all business units operating under the GTCloud™ platform and covers information security processes related to cloud storage, identity management, and client data handling.
+
+The implementation was led by the Information Security Office in coordination with the Legal and Compliance Departments. The key areas addressed were:
+
+    Risk assessment and mitigation based on the Statement of Applicability (SoA) v3.2.
+
+    Encryption and access control policies (ref: GTS-ISMS-POL-45).
+
+    Employee awareness and secure development training.
+
+    Continuous monitoring via our SIEM (Security Information and Event Management) system, codename: HawkSight.
