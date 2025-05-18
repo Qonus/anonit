@@ -83,6 +83,7 @@ export default function Chat() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
+    setIsLoading(true);
     const files = Array.from(e.target.files);
 
     const newUploadingFiles = files.map((file) => ({
@@ -125,6 +126,7 @@ export default function Chat() {
       }
     }
     setUploadingFiles(newFiles)
+    setIsLoading(false);
     e.target.value = "";
   };
 
