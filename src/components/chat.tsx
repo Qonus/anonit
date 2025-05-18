@@ -28,6 +28,7 @@ export default function Chat() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (content == "") return;
+    setIsLoading(true);
     try {
       const anonymized_text = await axios.post(`/api/anonymize`, {
         text: content,
@@ -43,7 +44,6 @@ export default function Chat() {
       setUploadingFiles([]);
 
       // SEND REQUEST TO AI
-      setIsLoading(true);
       const contents = await Promise.all(updatedMessages.map(async (message) => {
         const inlineParts = await Promise.all(
           message.files.map(async (uf) => ({
