@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const filepath = path.join(uploadDir, filename);
     await writeFile(filepath, buffer);
-    savedFiles.push(`/uploads/${filename}`);
+    savedFiles.push({url: `/uploads/${filename}`, base64: buffer.toString("base64"), media_type: isImage ? "image/jpeg" : "text/plain"});
   }
 
   return NextResponse.json({ files: savedFiles });

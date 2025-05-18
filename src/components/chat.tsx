@@ -1,27 +1,29 @@
 "use client";
 
-import { IMessage } from "@/app/actions";
+import { IMessage, IUploadingFile } from "@/app/actions";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import { Plus, Send, X } from "lucide-react";
-import Link from "next/link";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { v4 as uuidv4 } from "uuid";
-
-interface UploadingFile {
-  file: File;
-  progress: number;
-  url?: string;
-  id: string;
-}
 
 export default function Chat() {
   const [content, setContent] = useState("");
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState<IUploadingFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -33,16 +35,18 @@ export default function Chat() {
       const userMessage = {
         content: anonymized_text.data,
         isUser: true,
+        files: uploadingFiles
       };
       const updatedMessages = [...messages, userMessage];
       setMessages(updatedMessages);
       setContent("");
+      setUploadingFiles([]);
 
       // SEND REQUEST TO AI
       setIsLoading(true);
       const contents = await Promise.all(updatedMessages.map(async (message) => {
         const inlineParts = await Promise.all(
-          uploadingFiles.map(async (uf) => ({
+          message.files.map(async (uf) => ({
             inline_data: {
               mime_type: uf.file.type,
               data: Buffer.from(await uf.file.arrayBuffer()).toString("base64"),
@@ -57,18 +61,20 @@ export default function Chat() {
           {text: message.content,},
         ],
       }}));
+      console.log(contents);
       const response = await axios.post(`/api/generate`, {
         contents: contents,
       });
       const modelMessage = {
         content: response.data,
         isUser: false,
+        files: []
       };
       setMessages((messages) => [...messages, modelMessage]);
-      setIsLoading(false);
     } catch (e) {
       console.log(e);
     }
+    setIsLoading(false);
   };
 
   const handlePlusClick = () => {
@@ -85,6 +91,8 @@ export default function Chat() {
       id: uuidv4(),
     }));
     setUploadingFiles((prev) => [...prev, ...newUploadingFiles]);
+
+    let newFiles = [...uploadingFiles]
     for (const uploadingFile of newUploadingFiles) {
       const formData = new FormData();
       formData.append("files", uploadingFile.file);
@@ -101,32 +109,48 @@ export default function Chat() {
             );
           },
         });
-        setUploadingFiles((current) =>
-          current.map((uf, i) =>
-            uf.id === uploadingFile.id
-              ? { ...uf, progress: 1, url: data.files[i] }
-              : { ...uf, url: data.files[i] }
-          )
-        );
+        const getFile = (base64: string, filename: string, media_type: string) => {
+          const byteCharacters = atob(base64);
+          const byteNumbers = new Array(byteCharacters.length).fill(0).map((_, i) => byteCharacters.charCodeAt(i));
+          const byteArray = new Uint8Array(byteNumbers);
+          return new File([byteArray], filename, { type: media_type });
+        }
+        newFiles.push({
+          ...uploadingFile,
+          url: data.files[0].url,
+          file: getFile(data.files[0].base64,uploadingFile.file.name,data.files[0].media_type)
+        });
       } catch (error) {
         console.error("Upload error", error);
       }
     }
-
+    setUploadingFiles(newFiles)
     e.target.value = "";
   };
 
   return (
-    <div className="container max-w-200 relative p-5">
-      <div className="min-h-screen flex flex-col gap-3">
+    <div className="container max-w-200 relative h-120">
+      <div className="flex flex-col p-4 gap-3 h-full overflow-y-scroll" ref={containerRef}>
         {messages.map((message, i) => (
           <div
             key={i}
             className={cn(
-              "p-2 w-fit min-w-1/3 border rounded whitespace-break-spaces",
+              "p-3 w-fit max-w-full min-w-1/3 border rounded-xl whitespace-break-spaces",
               message.isUser ? "ml-auto bg-card" : ""
             )}
           >
+            {message.files.length != 0 &&
+            <div className="flex overflow-x-scroll gap-3 pb-3">
+            {message.files.map((uf, i) => (
+              <div
+              onClick={() => window.open(uf.url || "", "_blank")}
+              key={i}
+              className="hover:bg-accent cursor-pointer transition border rounded-2xl p-3 bg-card w-20 flex flex-col group"
+            >
+              <p className="truncate font-semibold">{uf.file.name}</p>
+            </div>
+            ))}
+            </div>}
             <p>{message.content}</p>
           </div>
         ))}
@@ -140,10 +164,9 @@ export default function Chat() {
           {uploadingFiles.length > 0 && (
             <div className="flex overflow-x-scroll gap-3 pb-3">
               {uploadingFiles.map((uf, i) => (
-                <Link
-                  target="_blank"
+                <div
+                  onClick={() => window.open(uf.url || "", "_blank")}
                   key={i}
-                  href={uf.url || ""}
                   className="border rounded-2xl p-3 bg-card w-48 flex flex-col group"
                 >
                   <div className="flex justify-between items-center h-8">
@@ -151,12 +174,12 @@ export default function Chat() {
                     <button
                       type="button"
                       className="rounded-full bg-transparent hover:bg-accent group-hover:block hidden p-2"
-                      onClick={() =>
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setUploadingFiles((prev) =>
                           prev.filter((f) => f.id != uf.id)
-                        )
-                      }
-                    >
+                        );
+                      }}>
                       <X className="stroke-card-foreground size-4" />
                     </button>
                   </div>
@@ -166,7 +189,7 @@ export default function Chat() {
                   <p className="text-sm text-gray-600">
                     {(uf.progress * 100).toFixed(2)}
                   </p>
-                </Link>
+                </div>
               ))}
             </div>
           )}
