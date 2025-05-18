@@ -92,7 +92,7 @@ export default function Chat() {
     }));
     setUploadingFiles((prev) => [...prev, ...newUploadingFiles]);
 
-    let newFiles = [...uploadingFiles]
+    const newFiles = [...uploadingFiles]
     for (const uploadingFile of newUploadingFiles) {
       const formData = new FormData();
       formData.append("files", uploadingFile.file);
