@@ -4,7 +4,7 @@ import mime from 'mime-types';
 import path from 'path';
 
 export async function GET(req: Request, { params }: { params: { filename: string } }) { // eslint-disable-line no-use-before-define
-  const filePath = path.join(process.cwd(), '/tmp', params.filename);
+  const filePath = path.join('/tmp', params.filename);
   const contentType = mime.lookup(filePath) || 'application/octet-stream';
   try {
     const file = await readFile(filePath);

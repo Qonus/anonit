@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const formData = await req.formData();
   const files = formData.getAll("files") as File[];
 
-  const uploadDir = path.join(process.cwd(), "/tmp");
+  const uploadDir = path.join("/tmp");
   await mkdir(uploadDir, { recursive: true });
 
   const savedFiles = [];
